@@ -558,12 +558,6 @@ resource "aws_cloudfront_distribution" "main" {
       restriction_type = "none"
     }
   }
-
-  custom_error_response {
-    error_code         = 404
-    response_code      = 200
-    response_page_path = "/index.html"
-  }
 }
 
 # Optional: Custom domain configuration (only created when use_custom_domain = true)

@@ -37,3 +37,9 @@ def welcome():
         </body></html>
     """
     return html
+
+
+@app.get("/health")
+def health():
+    """Instant API Health endpoint."""
+    return {"status": "healthy"}

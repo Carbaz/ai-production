@@ -23,22 +23,29 @@ _logger.info("Clerk configuration set up.")
 def idea(creds: HTTPAuthorizationCredentials = Depends(clerk_guard)):
     """Endpoint to stream a new business idea for AI Agents."""
     _logger.info("Generating a new business idea for AI Agents (streaming).")
+
+    # Extracting user information from JWT token.
     user_id = creds.decoded["sub"]  # User ID from JWT - available for future use
     # We now know which user is making the request!
     # You could use user_id to:
     # - Track usage per user
     # - Store generated ideas in a database
     # - Apply user-specific limits or customization
-    _logger.info(f"Request made by user: {user_id}")
+    subs_plan = creds.decoded.get("subscription", "free")
+    _logger.info(f"Request made by user: {user_id} with subscription plan: {subs_plan}")
+
+    # Sending request to OpenAI model.
+    _logger.info("Sending request to OpenAI model.")
     client = OpenAI()
     message = """
     Reply with a new business idea for AI Agents,
     formatted with headings, sub-headings and bullet points
     """
     messages = [{"role": "user", "content": message}]
-    _logger.info("Sending request to OpenAI GPT-5 model.")
     stream = client.chat.completions.create(model="gpt-5-nano", messages=messages,
                                             stream=True)
+
+    # Streaming the response back to the client.
     _logger.info("Streaming response from OpenAI GPT-5 model.")
 
     def event_stream():

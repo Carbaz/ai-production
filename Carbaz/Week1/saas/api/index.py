@@ -4,7 +4,7 @@ import os
 from logging import getLogger
 
 from fastapi import Depends, FastAPI
-from fastapi.responses import PlainTextResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from fastapi_clerk_auth import ClerkConfig, ClerkHTTPBearer, HTTPAuthorizationCredentials
 from openai import OpenAI
 

@@ -28,7 +28,8 @@ export default function Product() {
                 },
                 onerror(err) {
                     console.error('SSE error:', err);
-                    // Don't throw - let it retry
+                    setIdea('Unable to generate an idea. Please try again.');
+                    throw err;
                 }
             });
         })();

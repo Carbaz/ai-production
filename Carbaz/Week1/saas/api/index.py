@@ -1,11 +1,20 @@
 """API for generating new business ideas for AI Agents using OpenAI's GPT-5 model."""
 
-from fastapi import FastAPI
+import os
+
+from fastapi import Depends, FastAPI
 from fastapi.responses import PlainTextResponse, StreamingResponse
+from fastapi_clerk_auth import ClerkConfig, ClerkHTTPBearer, HTTPAuthorizationCredentials
 from openai import OpenAI
 
 
 app = FastAPI()
+
+clerk_config = ClerkConfig(
+    jwks_url=os.getenv("CLERK_JWKS_URL"),
+    verify_iat=False,
+    leeway=30.0)
+clerk_guard = ClerkHTTPBearer(clerk_config)
 
 
 @app.get("/api/straight", response_class=PlainTextResponse)
@@ -19,8 +28,15 @@ def idea():
 
 
 @app.get("/api")
-def idea_stream():
+def idea_stream(creds: HTTPAuthorizationCredentials = Depends(clerk_guard)):
     """Endpoint to stream a new business idea for AI Agents."""
+    user_id = creds.decoded["sub"]  # User ID from JWT - available for future use
+    # We now know which user is making the request!
+    # You could use user_id to:
+    # - Track usage per user
+    # - Store generated ideas in a database
+    # - Apply user-specific limits or customization
+
     client = OpenAI()
     message = """
     Reply with a new business idea for AI Agents,
@@ -35,8 +51,9 @@ def idea_stream():
             text = chunk.choices[0].delta.content
             if text:
                 lines = text.split("\n")
-                for line in lines:
-                    yield f"data: {line}\n"
-                yield "\n"
+                for line in lines[:-1]:
+                    yield f"data: {line}\n\n"
+                    yield "data:  \n"
+                yield f"data: {lines[-1]}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")

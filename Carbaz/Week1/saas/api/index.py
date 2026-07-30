@@ -14,10 +14,7 @@ _logger = getLogger(__name__)
 app = FastAPI()
 _logger.info("Starting API.")
 
-clerk_config = ClerkConfig(
-    jwks_url=os.getenv("CLERK_JWKS_URL"),
-    verify_iat=False,
-    leeway=30.0)
+clerk_config = ClerkConfig(jwks_url=os.getenv("CLERK_JWKS_URL"))
 clerk_guard = ClerkHTTPBearer(clerk_config)
 _logger.info("Clerk configuration set up.")
 

@@ -10,19 +10,16 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 export default function Product() {
     const { getToken } = useAuth();
     const [idea, setIdea] = useState<string>('…loading');
-    const [error, setError] = useState(false);
 
-    const generateIdea = async () => {
+    useEffect(() => {
         let buffer = '';
-        setIdea('…loading');
-        setError(false);
-        const jwt = await getToken();
-        if (!jwt) {
-            setIdea('Authentication required');
-            return;
-        }
+        (async () => {
+            const jwt = await getToken();
+            if (!jwt) {
+                setIdea('Authentication required');
+                return;
+            }
 
-        try {
             await fetchEventSource('/api', {
                 headers: { Authorization: `Bearer ${jwt}` },
                 onmessage(ev) {
@@ -31,18 +28,11 @@ export default function Product() {
                 },
                 onerror(err) {
                     console.error('SSE error:', err);
-                    setError(true);
                     setIdea('Unable to generate an idea. Please try again.');
                     throw err;
                 }
             });
-        } catch (err) {
-            console.error('SSE request failed:', err);
-        }
-    };
-
-    useEffect(() => {
-        generateIdea();
+        })();
     }, []); // Empty dependency array - run once on mount
 
     return (
@@ -74,15 +64,6 @@ export default function Product() {
                                 >
                                     {idea}
                                 </ReactMarkdown>
-                                {error && (
-                                    <button
-                                        type="button"
-                                        onClick={generateIdea}
-                                        className="mt-6 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow hover:bg-blue-700"
-                                    >
-                                        Reintentar
-                                    </button>
-                                )}
                             </div>
                         )}
                     </div>

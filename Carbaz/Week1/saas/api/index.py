@@ -19,19 +19,8 @@ clerk_guard = ClerkHTTPBearer(clerk_config)
 _logger.info("Clerk configuration set up.")
 
 
-@app.get("/api/straight", response_class=PlainTextResponse)
-def idea():
-    """Endpoint to generate a new business idea for AI Agents, non-streaming."""
-    _logger.info("Generating a new business idea for AI Agents.")
-    client = OpenAI()
-    message = "Come up with a new business idea for AI Agents"
-    messages = [{"role": "user", "content": message}]
-    response = client.chat.completions.create(model="gpt-5-nano", messages=messages)
-    return response.choices[0].message.content
-
-
 @app.get("/api")
-def idea_stream(creds: HTTPAuthorizationCredentials = Depends(clerk_guard)):
+def idea(creds: HTTPAuthorizationCredentials = Depends(clerk_guard)):
     """Endpoint to stream a new business idea for AI Agents."""
     _logger.info("Generating a new business idea for AI Agents (streaming).")
     user_id = creds.decoded["sub"]  # User ID from JWT - available for future use

@@ -24,6 +24,7 @@ def idea(creds: HTTPAuthorizationCredentials = Depends(clerk_guard)):
     """Endpoint to stream a new business idea for AI Agents."""
     _logger.info("Generating a new business idea for AI Agents (streaming).")
 
+    # _logger.info(f"Validating JWT token with Clerk: {creds.decoded}")
     # Extracting user information from JWT token.
     user_id = creds.decoded["sub"]  # User ID from JWT - available for future use
     # We now know which user is making the request!
@@ -31,7 +32,7 @@ def idea(creds: HTTPAuthorizationCredentials = Depends(clerk_guard)):
     # - Track usage per user
     # - Store generated ideas in a database
     # - Apply user-specific limits or customization
-    subs_plan = creds.decoded.get("subscription", "free")
+    subs_plan = creds.decoded.get("pla", "free")
     _logger.info(f"Request made by user: {user_id} with subscription plan: {subs_plan}")
 
     # Sending request to OpenAI model.

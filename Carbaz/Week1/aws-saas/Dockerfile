@@ -21,7 +21,7 @@ ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 RUN npm run build
 
 # Stage 2: Create the final Python container
-FROM python:3.13-slim as backend
+FROM python:3.13-slim AS backend
 
 WORKDIR /app
 

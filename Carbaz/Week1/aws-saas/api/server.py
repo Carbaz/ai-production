@@ -2,9 +2,12 @@
 
 import os
 from logging import getLogger
+from pathlib import Path
 
 from fastapi import Depends, FastAPI
-from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi_clerk_auth import ClerkConfig, ClerkHTTPBearer, HTTPAuthorizationCredentials
 from openai import OpenAI
 from pydantic import BaseModel
@@ -15,6 +18,12 @@ _logger = getLogger(__name__)
 _logger.info("Starting API.")
 app = FastAPI()
 
+# Add CORS middleware (allows frontend to call backend)
+app.add_middleware(CORSMiddleware,
+                   allow_origins=["*"], allow_credentials=True,
+                   allow_methods=["*"], allow_headers=["*"])
+
+# Clerk authentication setup
 _logger.info("Setting up Clerk configuration.")
 clerk_config = ClerkConfig(jwks_url=os.getenv("CLERK_JWKS_URL"))
 clerk_guard = ClerkHTTPBearer(clerk_config)
@@ -69,7 +78,7 @@ def access_denied_stream():
     yield "data:  \n"
 
 
-@app.post("/api")
+@app.post("/api/consultation")
 def consultation_summary(visit: Visit,
                          creds: HTTPAuthorizationCredentials = Depends(clerk_guard)):
     """Endpoint to stream a summary of a patient's visit based on doctor's notes."""
@@ -97,3 +106,20 @@ def consultation_summary(visit: Visit,
     # Streaming the response back to the client.
     _logger.info("Returning streaming response to client.")
     return StreamingResponse(event_stream(stream), media_type="text/event-stream")
+
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint (used for local Docker; Lambda does not invoke it)."""
+    return {"status": "healthy"}
+
+
+# Serve static files (our Next.js export) - MUST BE LAST!
+static_path = Path("static")
+if static_path.exists():
+    @app.get("/")
+    async def serve_root():
+        """Serve the index.html file for the root path."""
+        return FileResponse(static_path / "index.html")
+
+    app.mount("/", StaticFiles(directory="static", html=True), name="static")

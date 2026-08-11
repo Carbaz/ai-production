@@ -42,6 +42,7 @@ ENV AWS_LWA_INVOKE_MODE=response_stream
 # RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir pipenv
 COPY Pipfile* .
+ENV PIPENV_VENV_IN_PROJECT=1
 RUN pipenv install
 
 # Copy the FastAPI server

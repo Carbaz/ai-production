@@ -498,7 +498,7 @@ docker build `
   -t consultation-app .
 ```
 
-This will take 2-3 minutes the first time.  
+This will take 2-3 minutes the first time.
 
 Windows people: if you get an error `The image manifest, config or layer media type for the source image [...] is not supported` then please go to Docker Desktop -> Settings -> General and make sure that "Use containerd for pulling and storing images checkbox" is NOT checked. Thank you Muhammad T. for this pro tip..
 
@@ -610,6 +610,7 @@ aws ecr get-login-password --region $DEFAULT_AWS_REGION | docker login --usernam
 # 2. Build for Linux/AMD64 (CRITICAL for Apple Silicon Macs!)
 docker build \
   --platform linux/amd64 \
+  --provenance=false \
   --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" \
   -t consultation-app .
 
@@ -628,6 +629,7 @@ aws ecr get-login-password --region $env:DEFAULT_AWS_REGION | docker login --use
 # 2. Build for Linux/AMD64
 docker build `
   --platform linux/amd64 `
+  --provenance=false `
   --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="$env:NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" `
   -t consultation-app .
 
@@ -680,14 +682,14 @@ Now configure resources and environment variables.
    - **Timeout**: `5 min 0 sec` (`300` seconds) — long enough for the longest expected OpenAI streaming response
 4. Click **Save**
 
-#### Cap Concurrency at 2
+#### Cap Concurrency at 4
 
-By default, Lambda will scale your function out to many concurrent containers under load. For a course project, you want a hard cap so a runaway loop or a bot can't rack up usage. We'll set **Reserved Concurrency** to `2` — meaning at most 2 containers will ever run at the same time. Anything beyond that will be throttled with HTTP 429 until one finishes.
+By default, Lambda will scale your function out to many concurrent containers under load. For a course project, you want a hard cap so a runaway loop or a bot can't rack up usage. We'll set **Reserved Concurrency** to `4` — meaning at most 4 containers will ever run at the same time. Anything beyond that will be throttled with HTTP 429 until one finishes.
 
 5. Still in the **Configuration** tab, click **Concurrency and recursion detection** (left side)
 6. On the **Concurrency** card, click **Edit**
 7. Select **Reserve concurrency**
-8. Enter `2` for **Reserved concurrency**
+8. Enter `4` for **Reserved concurrency**
 9. Click **Save**
 
 > **Important — do NOT touch Provisioned concurrency.** That's a separate, paid feature on a different card on the same page that pre-warms containers and **costs money even when idle**. We only want **Reserved** concurrency, which is free and just acts as a ceiling. Leave Provisioned concurrency alone.

@@ -1,0 +1,6 @@
+# Deployment
+lambda-deployment.zip
+lambda-package/
+
+# Personal data files
+data/

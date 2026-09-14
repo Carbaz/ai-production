@@ -178,3 +178,8 @@ cython_debug/
 finale/.bedrock_agentcore.yaml
 finale/Dockerfile
 finale/.dockerignore
+
+.next
+.vercel
+node_modules
+next-env.d.ts
